@@ -1,0 +1,52 @@
+import pandas as pd
+import numpy as np  # Import the numpy module
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+# Load data from CSV file (replace with your actual file path)
+data = pd.read_csv("tree_dataset.csv")
+
+# Separate features and labels
+features = data[["Length (cm)", "Width (cm)", "Area (cm²)"]]
+labels = pd.Categorical(data["Label"]).codes  # Convert labels to numerical format
+
+# Split data into training and testing sets (adjust test_size as needed)
+X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
+
+# Standardize features (optional, but recommended for neural networks)
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Define the neural network model
+model = Sequential()
+model.add(Dense(10, activation="relu", input_shape=(features.shape[1],)))  # Hidden layer with 10 neurons and ReLU activation
+model.add(Dense(3, activation="softmax"))  # Output layer with 3 neurons (number of tree species) and softmax activation
+
+# Compile the model
+model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+# Train the model
+model.fit(X_train, y_train, epochs=100, batch_size=32, validation_data=(X_test, y_test))
+
+# Evaluate the model on the testing set
+loss, accuracy = model.evaluate(X_test, y_test)
+print("Test Loss:", loss)
+print("Test Accuracy:", accuracy)
+
+# Make predictions on new leaf (replace with your measurements)
+new_leaf = [[1.4, 0.4, 18]]  # Example: Length, Width, Area
+new_leaf = scaler.transform(new_leaf)  # Standardize new leaf data
+predictions = model.predict(new_leaf)  # Predict class probabilities
+predicted_class = np.argmax(predictions)  # Get the predicted class label
+#prediction = model.predict_classes(new_leaf)  # Predict class (0, 1, or 2)
+
+# Convert prediction back to original class label
+#predicted_species = data["Label"].iloc[prediction[0]]  # Access label using predicted index
+predicted_species = data["Label"].iloc[predicted_class]
+
+print("\n**Prediction on New Leaf**")
+print("Predicted Class:", predicted_species)
