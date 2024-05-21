@@ -35,7 +35,7 @@ model.fit(X_train, y_train, epochs=100, batch_size=32, validation_data=(X_test, 
 # Evaluate the model on the testing set
 loss, accuracy = model.evaluate(X_test, y_test)
 print("Test Loss:", loss)
-print("Test Accuracy:", accuracy)
+print(f"Test Accuracy: {accuracy * 100: 2f}%")
 
 # Make predictions on new leaf (replace with your measurements)
 new_leaf = [[1.4, 0.4, 18]]  # Example: Length, Width, Area
